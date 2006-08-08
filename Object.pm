@@ -5,13 +5,13 @@ use warnings;
 use vars qw/ @ISA @EXPORT_OK /;
 use Exporter;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 @ISA         = qw/ Exporter /;
 @EXPORT_OK   = qw/ jids /;
 
 use Inline C       => 'DATA',
            NAME    => 'BSD::Jail::Object',
-           VERSION => '0.01';
+           VERSION => '0.02';
 
 sub new
 {
@@ -24,6 +24,11 @@ sub new
     if ( ref $opts eq 'HASH' ) {
 
         # create a new jail
+
+        if ( $< ) {
+            $@ = "jail() requires root";
+            return;
+        }
 
         unless ( $opts->{'path'}     &&
                  $opts->{'hostname'} &&
@@ -88,6 +93,11 @@ sub attach
 {
     my $self = shift;
     return unless $self->jid;
+
+    if ( $< ) {
+        $@ = "jail_attach() requires root";
+        return;
+    }
 
     return _attach( $self->jid );
 }
